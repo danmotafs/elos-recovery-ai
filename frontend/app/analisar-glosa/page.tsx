@@ -268,9 +268,17 @@ export default function AnalisarGlosaPage() {
                   <CheckCircle2 className="h-5 w-5" />
                   <p className="font-semibold">Recomendação</p>
                 </div>
+
                 <p className="leading-7 text-slate-300">
                   {resultado.recomendacao}
                 </p>
+
+                <a
+                  href="/dashboard"
+                  className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-[#005CA9] px-6 py-4 font-semibold text-white transition hover:bg-[#1E73BE]"
+                >
+                  Ver Dashboard Executivo
+                </a>
               </div>
             </div>
           )}

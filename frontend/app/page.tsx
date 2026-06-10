@@ -27,7 +27,7 @@ const steps = [
     icon: Brain,
     title: "Análise inteligente",
     description:
-      "Aplicação de regras assistenciais, financeiras e motor de IA para classificação e recomendação.",
+      "Aplicação de regras assistenciais, financeiras e motor de análise para classificação e recomendação.",
   },
   {
     icon: ClipboardCheck,
@@ -35,14 +35,19 @@ const steps = [
     description:
       "Geração de parecer técnico, prioridade operacional e trilha de ação para recuperação de receita.",
   },
+  {
+    icon: ShieldCheck,
+    title: "Curadoria Especializada",
+    description:
+      "Todos os recursos são apoiados por rigorosa curadoria técnica realizada por profissionais com mais de 40 anos de experiência acumulada em auditoria, faturamento hospitalar e recuperação de receitas.",
+  },
 ];
-
 const benefits = [
   "Padronização da análise de glosas",
   "Redução de perdas financeiras hospitalares",
   "Rastreabilidade técnica e operacional",
   "Indicadores para auditoria, faturamento e gestão",
-  "Base para evolução com agentes de IA",
+  "Base de Referência - documentos e tabelas oficiais",
 ];
 
 export default function Home() {
@@ -76,10 +81,10 @@ export default function Home() {
           </nav>
 
           <a
-            href="#painel"
+            href="/analisar-glosa"
             className="hidden rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-blue-100 md:inline-flex"
           >
-            Ver demonstração
+            Conheça a solução
           </a>
         </header>
 
@@ -87,7 +92,7 @@ export default function Home() {
           <div>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-300/20 bg-blue-300/10 px-4 py-2 text-sm text-blue-200">
               <ShieldCheck className="h-4 w-4" />
-              IA aplicada à auditoria hospitalar e recuperação de receitas
+              Tecnologia aplicada à auditoria hospitalar e recuperação de receitas
             </div>
 
             <h1 className="max-w-4xl text-5xl font-semibold leading-tight tracking-tight md:text-7xl">
@@ -97,25 +102,25 @@ export default function Home() {
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-              Plataforma inteligente para análise de glosas, padronização de
-              processos, apoio técnico ao recurso e geração de indicadores para
-              assistência, faturamento e auditoria.
+              Tecnologia para análise de glosas, padronização de processos,
+              apoio técnico ao recurso e geração de indicadores para assistência,
+              faturamento e auditoria.
             </p>
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
               <a
-                href="#painel"
+                href="/analisar-glosa"
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-[#005CA9] px-7 py-4 font-semibold text-white transition hover:bg-[#1E73BE]"
               >
-                Conhecer plataforma
+                Conheça a solução
                 <ArrowRight className="h-5 w-5" />
               </a>
 
               <a
-                href="#solucao"
+                href="/dashboard"
                 className="inline-flex items-center justify-center rounded-full border border-white/15 px-7 py-4 font-semibold text-white transition hover:bg-white/10"
               >
-                Ver proposta técnica
+                Ver Dashboard Executivo
               </a>
             </div>
 
@@ -192,7 +197,7 @@ export default function Home() {
 
               <div className="mt-4 rounded-2xl border border-blue-300/20 bg-blue-300/10 p-5">
                 <p className="text-sm font-semibold text-blue-200">
-                  Recomendação IA
+                  Recomendação
                 </p>
                 <p className="mt-2 text-sm leading-6 text-slate-300">
                   Priorizar recurso técnico com revisão documental, vínculo
@@ -242,7 +247,7 @@ export default function Home() {
             </h2>
           </div>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             {steps.map((step) => {
               const Icon = step.icon;
 
@@ -273,14 +278,12 @@ export default function Home() {
                 Tecnologia
               </p>
               <h2 className="mt-4 text-4xl font-semibold tracking-tight md:text-5xl">
-                MVP preparado para evoluir para APIs, agentes e fluxos
-                assíncronos.
+                Nossa Solução é preparada para evoluir e otimizar a análise de
+                fluxos assíncronos dentro do fluxo financeiro hospitalar.
               </h2>
               <p className="mt-6 leading-8 text-slate-300">
-                A primeira versão apresenta a proposta comercial e técnica da
-                solução. A evolução natural inclui backend em Python, FastAPI,
-                banco de dados, logs auditáveis e agente de IA para análise de
-                glosas.
+                Backend em Python, FastAPI, banco de dados, logs auditáveis e
+                Machine Learning para análise de glosas.
               </p>
 
               <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.04] p-6">
@@ -294,7 +297,7 @@ export default function Home() {
                     "FastAPI",
                     "Pydantic",
                     "PostgreSQL",
-                    "Agentes de IA",
+                    "Machine Learning",
                   ].map((tech) => (
                     <span
                       key={tech}
