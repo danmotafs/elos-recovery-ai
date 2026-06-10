@@ -1,24 +1,46 @@
+import json
+from pathlib import Path
+
+
+BASE_PATH = Path(__file__).resolve().parents[2] / "data" / "glosas_conhecimento.json"
+
+
+def carregar_base_conhecimento():
+    with open(BASE_PATH, "r", encoding="utf-8") as arquivo:
+        return json.load(arquivo)
+
+
 def analisar_glosa(dados):
-    motivo = dados.motivo.lower()
+    base_conhecimento = carregar_base_conhecimento()
 
-    if "document" in motivo:
-        categoria = "Documentação"
-        chance = 82
-        prioridade = "Alta"
+    texto_analise = (
+        f"{dados.motivo} "
+        f"{dados.cid} "
+        f"{dados.procedimento}"
+    ).lower()
 
-    elif "cid" in motivo:
-        categoria = "Codificação"
-        chance = 74
-        prioridade = "Média"
+    for regra in base_conhecimento:
+        palavras_chave = regra.get("palavras_chave", [])
 
-    else:
-        categoria = "Outros"
-        chance = 60
-        prioridade = "Média"
+        for palavra in palavras_chave:
+            if palavra.lower() in texto_analise:
+                return {
+                    "categoria": regra["categoria"],
+                    "prioridade": regra["prioridade"],
+                    "chance_recuperacao": regra["chance_recuperacao"],
+                    "recomendacao": regra["recomendacao"],
+                    "fonte": "Base de Conhecimento de Glosas",
+                    "evidencia": palavra,
+                }
 
     return {
-        "categoria": categoria,
-        "prioridade": prioridade,
-        "chance_recuperacao": chance,
-        "recomendacao": "Revisar documentação assistencial e reenviar recurso."
+        "categoria": "Outros",
+        "prioridade": "Média",
+        "chance_recuperacao": 60,
+        "recomendacao": (
+            "Realizar análise técnica individualizada considerando contrato, "
+            "prontuário e justificativas assistenciais."
+        ),
+        "fonte": "Regra padrão",
+        "evidencia": "Nenhuma palavra-chave identificada",
     }

@@ -1,0 +1,37 @@
+[
+  {
+    "categoria": "Documentação",
+    "palavras_chave": ["documentação", "documento", "relatório", "laudo", "assinatura", "prontuário"],
+    "chance_recuperacao": 82,
+    "prioridade": "Alta",
+    "recomendacao": "Revisar e complementar a documentação assistencial antes do reenvio do recurso."
+  },
+  {
+    "categoria": "CID/TUSS",
+    "palavras_chave": ["cid", "tuss", "codificação", "código", "procedimento incompatível"],
+    "chance_recuperacao": 74,
+    "prioridade": "Média",
+    "recomendacao": "Revisar a compatibilidade entre CID, procedimento executado e codificação informada."
+  },
+  {
+    "categoria": "Autorização",
+    "palavras_chave": ["autorização", "senha", "guia", "prévia", "liberação"],
+    "chance_recuperacao": 68,
+    "prioridade": "Média",
+    "recomendacao": "Validar autorização, senha e guia vinculadas ao atendimento."
+  },
+  {
+    "categoria": "Material ou Medicamento",
+    "palavras_chave": ["material", "medicamento", "opme", "taxa", "insumo"],
+    "chance_recuperacao": 70,
+    "prioridade": "Alta",
+    "recomendacao": "Conferir prescrição, evolução, checagem e justificativa de uso dos itens cobrados."
+  },
+  {
+    "categoria": "Prazo ou Envio",
+    "palavras_chave": ["prazo", "envio", "fora do prazo", "reapresentação", "protocolo"],
+    "chance_recuperacao": 55,
+    "prioridade": "Baixa",
+    "recomendacao": "Verificar prazos contratuais, protocolo de envio e possibilidade de reapresentação."
+  }
+]

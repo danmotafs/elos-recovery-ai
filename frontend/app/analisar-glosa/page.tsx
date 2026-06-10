@@ -6,8 +6,10 @@ import {
   ArrowLeft,
   Brain,
   CheckCircle2,
+  Database,
   FileSearch,
   Loader2,
+  SearchCheck,
   ShieldCheck,
 } from "lucide-react";
 
@@ -25,6 +27,8 @@ type ResultadoAnalise = {
   prioridade: string;
   chance_recuperacao: number;
   recomendacao: string;
+  fonte: string;
+  evidencia: string;
 };
 
 const initialFormData: FormData = {
@@ -245,6 +249,20 @@ export default function AnalisarGlosaPage() {
                 value={`${resultado.chance_recuperacao}%`}
               />
 
+              <div className="grid gap-5 md:grid-cols-2">
+                <InfoCard
+                  icon={<Database className="h-5 w-5" />}
+                  label="Fonte da análise"
+                  value={resultado.fonte}
+                />
+
+                <InfoCard
+                  icon={<SearchCheck className="h-5 w-5" />}
+                  label="Evidência encontrada"
+                  value={resultado.evidencia}
+                />
+              </div>
+
               <div className="rounded-3xl border border-blue-300/20 bg-blue-300/10 p-5">
                 <div className="mb-3 flex items-center gap-2 text-blue-200">
                   <CheckCircle2 className="h-5 w-5" />
@@ -297,6 +315,24 @@ function ResultCard({ label, value }: { label: string; value: string }) {
     <div className="rounded-3xl border border-white/10 bg-slate-950 p-5">
       <p className="text-sm text-slate-400">{label}</p>
       <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
+    </div>
+  );
+}
+
+function InfoCard({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-3xl border border-white/10 bg-slate-950 p-5">
+      <div className="mb-3 flex items-center gap-2 text-blue-200">{icon}</div>
+      <p className="text-sm text-slate-400">{label}</p>
+      <p className="mt-2 text-base font-semibold text-white">{value}</p>
     </div>
   );
 }
