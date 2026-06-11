@@ -1,12 +1,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+
+from io import BytesIO
 
 from app.schemas import CasoGlosa
 from app.services.glosa_engine import analisar_glosa
+from app.services.recurso_generator import gerar_recurso_administrativo
+from app.services.pdf_generator import gerar_pdf_recurso
 
 app = FastAPI(
-    title="Elos Recovery AI",
-    version="0.1.0"
+    title="ELOS Consultoria e Gestão Financeira Hospitalar",
+    version="0.3.0"
 )
 
 app.add_middleware(
@@ -20,11 +25,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 def root():
     return {
-        "message": "Elos Recovery AI API"
+        "message": "ELOS Consultoria e Gestão Financeira Hospitalar API"
     }
+
 
 @app.get("/health")
 def health():
@@ -32,9 +39,48 @@ def health():
         "status": "ok"
     }
 
+
 @app.post("/api/glosa/analisar")
 def analisar(caso: CasoGlosa):
 
     resultado = analisar_glosa(caso)
 
     return resultado
+
+
+@app.post("/api/glosa/gerar-recurso")
+def gerar_recurso(caso: CasoGlosa):
+
+    analise = analisar_glosa(caso)
+
+    recurso = gerar_recurso_administrativo(
+        dados_glosa=caso.model_dump(),
+        analise=analise
+    )
+
+    return recurso
+
+
+@app.post("/api/glosa/gerar-pdf")
+def gerar_pdf(caso: CasoGlosa):
+
+    analise = analisar_glosa(caso)
+
+    recurso = gerar_recurso_administrativo(
+        dados_glosa=caso.model_dump(),
+        analise=analise
+    )
+
+    pdf_bytes = gerar_pdf_recurso(
+        dados_glosa=caso.model_dump(),
+        recurso=recurso
+    )
+
+    return StreamingResponse(
+        BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition":
+            'attachment; filename="ELOS_Recurso_Administrativo.pdf"'
+        }
+    )

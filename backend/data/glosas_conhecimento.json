@@ -1,37 +1,499 @@
 [
   {
     "categoria": "Documentação",
-    "palavras_chave": ["documentação", "documento", "relatório", "laudo", "assinatura", "prontuário"],
+    "subcategoria": "Assinatura ausente",
+    "palavras_chave": ["assinatura ausente", "sem assinatura", "falta de assinatura", "documento sem assinatura"],
+    "chance_recuperacao": 91,
+    "prioridade": "Alta",
+    "recomendacao": "Anexar documento devidamente assinado pelo profissional responsável e reapresentar o recurso."
+  },
+  {
+    "categoria": "Documentação",
+    "subcategoria": "Carimbo ausente",
+    "palavras_chave": ["carimbo ausente", "sem carimbo", "falta de carimbo", "identificação profissional ausente"],
+    "chance_recuperacao": 88,
+    "prioridade": "Alta",
+    "recomendacao": "Regularizar a identificação profissional com carimbo, registro do conselho e assinatura antes do reenvio."
+  },
+  {
+    "categoria": "Documentação",
+    "subcategoria": "Prontuário incompleto",
+    "palavras_chave": ["prontuário incompleto", "prontuario incompleto", "ausência de prontuário", "prontuário ausente"],
     "chance_recuperacao": 82,
     "prioridade": "Alta",
-    "recomendacao": "Revisar e complementar a documentação assistencial antes do reenvio do recurso."
+    "recomendacao": "Complementar o prontuário com evolução médica, registros assistenciais e documentos de suporte ao procedimento."
+  },
+  {
+    "categoria": "Documentação",
+    "subcategoria": "Evolução médica ausente",
+    "palavras_chave": ["evolução médica ausente", "sem evolução médica", "evolução ausente", "falta de evolução médica"],
+    "chance_recuperacao": 80,
+    "prioridade": "Alta",
+    "recomendacao": "Anexar evolução médica que comprove a necessidade assistencial do procedimento ou item cobrado."
+  },
+  {
+    "categoria": "Documentação",
+    "subcategoria": "Laudo ausente",
+    "palavras_chave": ["laudo ausente", "sem laudo", "falta de laudo", "laudo não anexado"],
+    "chance_recuperacao": 84,
+    "prioridade": "Alta",
+    "recomendacao": "Anexar laudo correspondente ao exame, procedimento ou material cobrado para fundamentar o recurso."
+  },
+  {
+    "categoria": "Documentação",
+    "subcategoria": "Relatório médico ausente",
+    "palavras_chave": ["relatório médico ausente", "sem relatório médico", "falta de relatório médico", "relatório não anexado"],
+    "chance_recuperacao": 86,
+    "prioridade": "Alta",
+    "recomendacao": "Solicitar relatório médico complementar descrevendo indicação, conduta, evolução e justificativa clínica."
+  },
+  {
+    "categoria": "Documentação",
+    "subcategoria": "Registro de enfermagem ausente",
+    "palavras_chave": ["registro de enfermagem ausente", "sem anotação de enfermagem", "anotação de enfermagem ausente", "checagem de enfermagem ausente"],
+    "chance_recuperacao": 76,
+    "prioridade": "Média",
+    "recomendacao": "Anexar registros de enfermagem e checagens que comprovem a execução do cuidado ou administração do item."
+  },
+  {
+    "categoria": "Documentação",
+    "subcategoria": "Folha de sala incompleta",
+    "palavras_chave": ["folha de sala incompleta", "folha de sala ausente", "registro cirúrgico incompleto", "descrição cirúrgica ausente"],
+    "chance_recuperacao": 78,
+    "prioridade": "Alta",
+    "recomendacao": "Complementar folha de sala, descrição cirúrgica e registros do procedimento para sustentar a cobrança."
+  },
+  {
+    "categoria": "Documentação",
+    "subcategoria": "Justificativa clínica ausente",
+    "palavras_chave": ["justificativa clínica ausente", "sem justificativa clínica", "falta de justificativa", "ausência de justificativa"],
+    "chance_recuperacao": 72,
+    "prioridade": "Alta",
+    "recomendacao": "Elaborar justificativa clínica objetiva vinculando diagnóstico, conduta realizada e necessidade assistencial."
+  },
+  {
+    "categoria": "Documentação",
+    "subcategoria": "Documento divergente",
+    "palavras_chave": ["documento divergente", "documentação divergente", "informação divergente", "dados divergentes"],
+    "chance_recuperacao": 66,
+    "prioridade": "Média",
+    "recomendacao": "Conferir divergências entre guia, prontuário, conta hospitalar e relatório antes da reapresentação."
+  },
+
+  {
+    "categoria": "CID/TUSS",
+    "subcategoria": "CID incompatível",
+    "palavras_chave": ["cid incompatível", "cid incompatível com procedimento", "diagnóstico incompatível", "cid não compatível"],
+    "chance_recuperacao": 74,
+    "prioridade": "Alta",
+    "recomendacao": "Revisar compatibilidade entre CID, procedimento executado e justificativa clínica documentada."
   },
   {
     "categoria": "CID/TUSS",
-    "palavras_chave": ["cid", "tuss", "codificação", "código", "procedimento incompatível"],
-    "chance_recuperacao": 74,
+    "subcategoria": "CID divergente",
+    "palavras_chave": ["cid divergente", "divergência de cid", "cid diferente", "cid informado divergente"],
+    "chance_recuperacao": 70,
     "prioridade": "Média",
-    "recomendacao": "Revisar a compatibilidade entre CID, procedimento executado e codificação informada."
+    "recomendacao": "Validar o diagnóstico correto no prontuário e retificar o CID quando houver erro de informação."
+  },
+  {
+    "categoria": "CID/TUSS",
+    "subcategoria": "CID não informado",
+    "palavras_chave": ["cid não informado", "sem cid", "ausência de cid", "cid ausente"],
+    "chance_recuperacao": 83,
+    "prioridade": "Alta",
+    "recomendacao": "Incluir CID compatível com a condição clínica e anexar documentação que fundamente o diagnóstico."
+  },
+  {
+    "categoria": "CID/TUSS",
+    "subcategoria": "TUSS divergente",
+    "palavras_chave": ["tuss divergente", "código tuss divergente", "código tuss incorreto", "tuss incorreto"],
+    "chance_recuperacao": 76,
+    "prioridade": "Alta",
+    "recomendacao": "Revisar o código TUSS informado e alinhar procedimento, descrição e documentação assistencial."
+  },
+  {
+    "categoria": "CID/TUSS",
+    "subcategoria": "Codificação incorreta",
+    "palavras_chave": ["codificação incorreta", "código incorreto", "erro de codificação", "código inválido"],
+    "chance_recuperacao": 72,
+    "prioridade": "Média",
+    "recomendacao": "Corrigir a codificação conforme tabela aplicável e justificar tecnicamente a adequação do código."
+  },
+
+  {
+    "categoria": "Procedimento",
+    "subcategoria": "Procedimento não autorizado",
+    "palavras_chave": ["procedimento não autorizado", "sem autorização do procedimento", "procedimento sem autorização"],
+    "chance_recuperacao": 52,
+    "prioridade": "Alta",
+    "recomendacao": "Verificar se houve autorização prévia, emergência documentada ou possibilidade contratual de recurso excepcional."
+  },
+  {
+    "categoria": "Procedimento",
+    "subcategoria": "Procedimento incompatível",
+    "palavras_chave": ["procedimento incompatível", "procedimento incompatível com cid", "procedimento não compatível"],
+    "chance_recuperacao": 68,
+    "prioridade": "Alta",
+    "recomendacao": "Demonstrar compatibilidade clínica entre diagnóstico, conduta médica e procedimento realizado."
+  },
+  {
+    "categoria": "Procedimento",
+    "subcategoria": "Procedimento duplicado",
+    "palavras_chave": ["procedimento duplicado", "cobrança duplicada", "duplicidade de procedimento", "item duplicado"],
+    "chance_recuperacao": 40,
+    "prioridade": "Média",
+    "recomendacao": "Auditar a conta para identificar duplicidade real ou comprovar execução distinta dos procedimentos cobrados."
+  },
+  {
+    "categoria": "Procedimento",
+    "subcategoria": "Procedimento não realizado",
+    "palavras_chave": ["procedimento não realizado", "sem comprovação de realização", "procedimento sem evidência", "não consta realização"],
+    "chance_recuperacao": 48,
+    "prioridade": "Alta",
+    "recomendacao": "Anexar evidências de realização, como evolução, laudo, descrição cirúrgica, folha de sala ou registro assistencial."
+  },
+  {
+    "categoria": "Procedimento",
+    "subcategoria": "Procedimento fora de cobertura",
+    "palavras_chave": ["procedimento fora de cobertura", "sem cobertura contratual", "procedimento não coberto", "exclusão contratual"],
+    "chance_recuperacao": 35,
+    "prioridade": "Média",
+    "recomendacao": "Conferir contrato, rol aplicável, autorização emitida e eventuais exceções clínicas documentadas."
+  },
+  {
+    "categoria": "Procedimento",
+    "subcategoria": "Divergência entre guia e cobrança",
+    "palavras_chave": ["divergência entre guia e cobrança", "guia divergente", "procedimento diferente da guia", "cobrança diferente da autorização"],
+    "chance_recuperacao": 69,
+    "prioridade": "Alta",
+    "recomendacao": "Conferir guia autorizada, conta apresentada e documentação para retificar ou justificar a divergência."
+  },
+  {
+    "categoria": "Procedimento",
+    "subcategoria": "Cobrança indevida",
+    "palavras_chave": ["cobrança indevida", "item cobrado indevidamente", "lançamento indevido", "cobrança não reconhecida"],
+    "chance_recuperacao": 42,
+    "prioridade": "Média",
+    "recomendacao": "Auditar lançamento e comprovar execução/uso do item ou proceder com ajuste interno quando a cobrança for improcedente."
+  },
+  {
+    "categoria": "Procedimento",
+    "subcategoria": "Procedimento sem indicação clínica",
+    "palavras_chave": ["sem indicação clínica", "falta de indicação clínica", "procedimento sem justificativa clínica", "não há indicação clínica"],
+    "chance_recuperacao": 58,
+    "prioridade": "Alta",
+    "recomendacao": "Anexar relatório médico fundamentando indicação clínica, contexto assistencial e benefício esperado ao paciente."
+  },
+
+  {
+    "categoria": "Autorização",
+    "subcategoria": "Guia ausente",
+    "palavras_chave": ["guia ausente", "sem guia", "guia não anexada", "ausência de guia"],
+    "chance_recuperacao": 79,
+    "prioridade": "Alta",
+    "recomendacao": "Anexar guia autorizada ou documento equivalente que comprove liberação do atendimento."
   },
   {
     "categoria": "Autorização",
-    "palavras_chave": ["autorização", "senha", "guia", "prévia", "liberação"],
+    "subcategoria": "Senha inválida",
+    "palavras_chave": ["senha inválida", "senha incorreta", "senha divergente", "senha não localizada"],
+    "chance_recuperacao": 62,
+    "prioridade": "Média",
+    "recomendacao": "Validar senha junto à operadora e confrontar dados de paciente, atendimento, data e procedimento."
+  },
+  {
+    "categoria": "Autorização",
+    "subcategoria": "Autorização vencida",
+    "palavras_chave": ["autorização vencida", "senha vencida", "guia vencida", "validade expirada"],
+    "chance_recuperacao": 46,
+    "prioridade": "Média",
+    "recomendacao": "Verificar data de execução, validade autorizada e eventual prorrogação ou justificativa assistencial."
+  },
+  {
+    "categoria": "Autorização",
+    "subcategoria": "Autorização divergente",
+    "palavras_chave": ["autorização divergente", "autorizado diferente", "divergência de autorização", "item não autorizado"],
+    "chance_recuperacao": 57,
+    "prioridade": "Alta",
+    "recomendacao": "Comparar itens autorizados com cobrança apresentada e justificar divergências com base em evolução clínica."
+  },
+  {
+    "categoria": "Autorização",
+    "subcategoria": "Falta de autorização prévia",
+    "palavras_chave": ["falta de autorização prévia", "sem autorização prévia", "ausência de autorização prévia", "não autorizado previamente"],
+    "chance_recuperacao": 44,
+    "prioridade": "Alta",
+    "recomendacao": "Avaliar se o caso possui caráter de urgência/emergência ou documentação que justifique autorização posterior."
+  },
+  {
+    "categoria": "Autorização",
+    "subcategoria": "Prorrogação não autorizada",
+    "palavras_chave": ["prorrogação não autorizada", "prorrogacao não autorizada", "sem prorrogação", "diária sem prorrogação"],
+    "chance_recuperacao": 50,
+    "prioridade": "Alta",
+    "recomendacao": "Anexar solicitação de prorrogação, evolução clínica e justificativa da permanência hospitalar."
+  },
+
+  {
+    "categoria": "OPME",
+    "subcategoria": "OPME sem autorização",
+    "palavras_chave": ["opme sem autorização", "opme não autorizada", "material especial sem autorização", "órtese sem autorização"],
+    "chance_recuperacao": 49,
+    "prioridade": "Alta",
+    "recomendacao": "Verificar autorização específica da OPME e anexar solicitação médica, justificativa e documentação de uso."
+  },
+  {
+    "categoria": "OPME",
+    "subcategoria": "Material não coberto",
+    "palavras_chave": ["material não coberto", "opme não coberta", "material fora de cobertura", "material excluído"],
+    "chance_recuperacao": 38,
+    "prioridade": "Média",
+    "recomendacao": "Analisar contrato, autorização emitida e justificativa clínica para avaliar possibilidade de contestação."
+  },
+  {
+    "categoria": "OPME",
+    "subcategoria": "Material divergente",
+    "palavras_chave": ["material divergente", "opme divergente", "material diferente do autorizado", "marca divergente"],
+    "chance_recuperacao": 61,
+    "prioridade": "Alta",
+    "recomendacao": "Confrontar material autorizado, utilizado e faturado, anexando justificativa técnica para eventual substituição."
+  },
+  {
+    "categoria": "OPME",
+    "subcategoria": "Nota fiscal ausente",
+    "palavras_chave": ["nota fiscal ausente", "sem nota fiscal", "nf ausente", "nota não anexada"],
+    "chance_recuperacao": 81,
+    "prioridade": "Alta",
+    "recomendacao": "Anexar nota fiscal correspondente ao material utilizado e vincular ao atendimento do paciente."
+  },
+  {
+    "categoria": "OPME",
+    "subcategoria": "Rastreabilidade ausente",
+    "palavras_chave": ["rastreabilidade ausente", "sem rastreabilidade", "lote ausente", "etiqueta ausente"],
+    "chance_recuperacao": 73,
+    "prioridade": "Alta",
+    "recomendacao": "Anexar etiquetas, lote, registro de uso e documentação de rastreabilidade do material implantado."
+  },
+  {
+    "categoria": "OPME",
+    "subcategoria": "Justificativa de OPME ausente",
+    "palavras_chave": ["justificativa de opme ausente", "opme sem justificativa", "material sem justificativa", "sem justificativa para opme"],
+    "chance_recuperacao": 67,
+    "prioridade": "Alta",
+    "recomendacao": "Solicitar justificativa médica detalhada para o uso da OPME, vinculada à condição clínica e ao procedimento."
+  },
+
+  {
+    "categoria": "Medicamentos",
+    "subcategoria": "Medicamento sem prescrição",
+    "palavras_chave": ["medicamento sem prescrição", "sem prescrição médica", "prescrição ausente", "medicação sem prescrição"],
+    "chance_recuperacao": 78,
+    "prioridade": "Alta",
+    "recomendacao": "Anexar prescrição médica correspondente e checagem de administração do medicamento."
+  },
+  {
+    "categoria": "Medicamentos",
+    "subcategoria": "Medicamento não coberto",
+    "palavras_chave": ["medicamento não coberto", "medicamento fora de cobertura", "medicação não coberta", "item não coberto"],
+    "chance_recuperacao": 41,
+    "prioridade": "Média",
+    "recomendacao": "Avaliar contrato, rol aplicável, autorização e justificativa clínica para contestar a negativa."
+  },
+  {
+    "categoria": "Medicamentos",
+    "subcategoria": "Dose divergente",
+    "palavras_chave": ["dose divergente", "dosagem divergente", "dose incompatível", "quantidade divergente"],
+    "chance_recuperacao": 63,
+    "prioridade": "Média",
+    "recomendacao": "Conferir prescrição, evolução, checagem e quantidade faturada para justificar ou corrigir a cobrança."
+  },
+  {
+    "categoria": "Medicamentos",
+    "subcategoria": "Medicamento sem checagem",
+    "palavras_chave": ["medicamento sem checagem", "sem checagem de enfermagem", "checagem ausente", "administração não checada"],
+    "chance_recuperacao": 69,
+    "prioridade": "Alta",
+    "recomendacao": "Anexar checagem de enfermagem e registro de administração para comprovar uso do medicamento."
+  },
+  {
+    "categoria": "Medicamentos",
+    "subcategoria": "Medicamento fora de protocolo",
+    "palavras_chave": ["medicamento fora de protocolo", "fora do protocolo", "uso não protocolar", "medicamento sem protocolo"],
+    "chance_recuperacao": 54,
+    "prioridade": "Média",
+    "recomendacao": "Anexar justificativa clínica, literatura de suporte ou protocolo institucional que fundamente a utilização."
+  },
+  {
+    "categoria": "Medicamentos",
+    "subcategoria": "Medicamento de alto custo",
+    "palavras_chave": ["medicamento de alto custo", "alto custo sem autorização", "medicação de alto custo", "medicamento especial"],
+    "chance_recuperacao": 58,
+    "prioridade": "Alta",
+    "recomendacao": "Validar autorização, indicação clínica, prescrição, checagem e documentação específica exigida pelo convênio."
+  },
+
+  {
+    "categoria": "Internação e Diárias",
+    "subcategoria": "Permanência excessiva",
+    "palavras_chave": ["permanência excessiva", "tempo de internação excessivo", "internação prolongada", "permanência prolongada"],
+    "chance_recuperacao": 55,
+    "prioridade": "Alta",
+    "recomendacao": "Anexar evolução clínica diária, intercorrências e justificativa médica para permanência hospitalar."
+  },
+  {
+    "categoria": "Internação e Diárias",
+    "subcategoria": "Diária não autorizada",
+    "palavras_chave": ["diária não autorizada", "diaria não autorizada", "diária sem autorização", "diária glosada"],
+    "chance_recuperacao": 52,
+    "prioridade": "Alta",
+    "recomendacao": "Conferir prorrogação, autorização de diária e evolução clínica que justifique a permanência."
+  },
+  {
+    "categoria": "Internação e Diárias",
+    "subcategoria": "Internação sem justificativa",
+    "palavras_chave": ["internação sem justificativa", "sem justificativa para internação", "internação não justificada", "ausência de justificativa de internação"],
+    "chance_recuperacao": 57,
+    "prioridade": "Alta",
+    "recomendacao": "Apresentar relatório médico com indicação de internação, critérios clínicos e evolução do paciente."
+  },
+  {
+    "categoria": "Internação e Diárias",
+    "subcategoria": "UTI sem critério",
+    "palavras_chave": ["uti sem critério", "uti sem indicação", "internação em uti sem justificativa", "sem critério para uti"],
+    "chance_recuperacao": 50,
+    "prioridade": "Alta",
+    "recomendacao": "Anexar parâmetros clínicos, instabilidade, suporte intensivo e evolução que sustentem necessidade de UTI."
+  },
+  {
+    "categoria": "Internação e Diárias",
+    "subcategoria": "UTI prolongada",
+    "palavras_chave": ["uti prolongada", "permanência prolongada em uti", "tempo excessivo em uti", "diária de uti prolongada"],
+    "chance_recuperacao": 53,
+    "prioridade": "Alta",
+    "recomendacao": "Apresentar evolução diária, critérios de permanência e justificativa médica para manutenção em UTI."
+  },
+  {
+    "categoria": "Internação e Diárias",
+    "subcategoria": "Acomodação divergente",
+    "palavras_chave": ["acomodação divergente", "acomodacao divergente", "tipo de acomodação divergente", "cobrança de acomodação divergente"],
+    "chance_recuperacao": 65,
+    "prioridade": "Média",
+    "recomendacao": "Conferir acomodação autorizada, utilizada e faturada, justificando diferenças quando aplicável."
+  },
+
+  {
+    "categoria": "Financeiro/Contratual",
+    "subcategoria": "Valor divergente",
+    "palavras_chave": ["valor divergente", "divergência de valor", "valor cobrado divergente", "valor não compatível"],
+    "chance_recuperacao": 71,
+    "prioridade": "Alta",
+    "recomendacao": "Conferir tabela contratual, valor faturado e regra de remuneração aplicável para sustentar o recurso."
+  },
+  {
+    "categoria": "Financeiro/Contratual",
+    "subcategoria": "Tabela incorreta",
+    "palavras_chave": ["tabela incorreta", "tabela divergente", "tabela aplicada incorretamente", "tabela não contratada"],
+    "chance_recuperacao": 69,
+    "prioridade": "Alta",
+    "recomendacao": "Validar tabela contratada e demonstrar a correta aplicação da referência acordada com a operadora."
+  },
+  {
+    "categoria": "Financeiro/Contratual",
+    "subcategoria": "CBHPM divergente",
+    "palavras_chave": ["cbhpm divergente", "cbhpm incorreta", "porte cbhpm divergente", "classificação cbhpm divergente"],
     "chance_recuperacao": 68,
     "prioridade": "Média",
-    "recomendacao": "Validar autorização, senha e guia vinculadas ao atendimento."
+    "recomendacao": "Revisar porte, classificação e regra contratual vinculada à CBHPM para fundamentar a contestação."
   },
   {
-    "categoria": "Material ou Medicamento",
-    "palavras_chave": ["material", "medicamento", "opme", "taxa", "insumo"],
-    "chance_recuperacao": 70,
-    "prioridade": "Alta",
-    "recomendacao": "Conferir prescrição, evolução, checagem e justificativa de uso dos itens cobrados."
+    "categoria": "Financeiro/Contratual",
+    "subcategoria": "Glosa contratual",
+    "palavras_chave": ["glosa contratual", "item não contratado", "fora do contrato", "não previsto em contrato"],
+    "chance_recuperacao": 37,
+    "prioridade": "Média",
+    "recomendacao": "Analisar cláusulas contratuais, aditivos, autorizações e histórico de pagamento para avaliar possibilidade de recurso."
   },
   {
-    "categoria": "Prazo ou Envio",
-    "palavras_chave": ["prazo", "envio", "fora do prazo", "reapresentação", "protocolo"],
-    "chance_recuperacao": 55,
+    "categoria": "Financeiro/Contratual",
+    "subcategoria": "Cobrança em duplicidade",
+    "palavras_chave": ["cobrança em duplicidade", "duplicidade de cobrança", "item em duplicidade", "cobrado duas vezes"],
+    "chance_recuperacao": 35,
+    "prioridade": "Média",
+    "recomendacao": "Auditar a conta para identificar duplicidade real ou comprovar que os lançamentos correspondem a eventos distintos."
+  },
+  {
+    "categoria": "Financeiro/Contratual",
+    "subcategoria": "Erro de faturamento",
+    "palavras_chave": ["erro de faturamento", "lançamento incorreto", "erro no faturamento", "faturamento incorreto"],
+    "chance_recuperacao": 62,
+    "prioridade": "Média",
+    "recomendacao": "Revisar lançamento, corrigir inconsistências e reapresentar a conta com documentação adequada."
+  },
+  {
+    "categoria": "Financeiro/Contratual",
+    "subcategoria": "Taxa não prevista",
+    "palavras_chave": ["taxa não prevista", "taxa não contratada", "taxa indevida", "taxa fora do contrato"],
+    "chance_recuperacao": 39,
     "prioridade": "Baixa",
-    "recomendacao": "Verificar prazos contratuais, protocolo de envio e possibilidade de reapresentação."
+    "recomendacao": "Conferir contrato e tabela de taxas aplicáveis antes de manter ou retirar a cobrança."
+  },
+
+  {
+    "categoria": "Prazo e Protocolo",
+    "subcategoria": "Recurso fora do prazo",
+    "palavras_chave": ["recurso fora do prazo", "fora do prazo de recurso", "prazo expirado", "perdeu prazo"],
+    "chance_recuperacao": 28,
+    "prioridade": "Alta",
+    "recomendacao": "Verificar prazo contratual, data de ciência da glosa e possibilidade excepcional de reabertura ou reapresentação."
+  },
+  {
+    "categoria": "Prazo e Protocolo",
+    "subcategoria": "Envio fora do prazo",
+    "palavras_chave": ["envio fora do prazo", "conta enviada fora do prazo", "apresentação fora do prazo", "protocolo fora do prazo"],
+    "chance_recuperacao": 32,
+    "prioridade": "Alta",
+    "recomendacao": "Conferir regra contratual de prazo, protocolo de envio e eventuais justificativas documentadas."
+  },
+  {
+    "categoria": "Prazo e Protocolo",
+    "subcategoria": "Protocolo ausente",
+    "palavras_chave": ["protocolo ausente", "sem protocolo", "protocolo não localizado", "ausência de protocolo"],
+    "chance_recuperacao": 60,
+    "prioridade": "Média",
+    "recomendacao": "Localizar comprovante de protocolo ou evidência de envio para sustentar reapresentação."
+  },
+  {
+    "categoria": "Prazo e Protocolo",
+    "subcategoria": "Reapresentação recusada",
+    "palavras_chave": ["reapresentação recusada", "reapresentacao recusada", "não aceita reapresentação", "recusa de reapresentação"],
+    "chance_recuperacao": 34,
+    "prioridade": "Média",
+    "recomendacao": "Avaliar regra contratual de reapresentação e histórico de comunicação com a operadora."
+  },
+
+  {
+    "categoria": "Auditoria",
+    "subcategoria": "Divergência entre prontuário e conta",
+    "palavras_chave": ["divergência entre prontuário e conta", "conta divergente do prontuário", "prontuário não confere", "conta não confere"],
+    "chance_recuperacao": 59,
+    "prioridade": "Alta",
+    "recomendacao": "Confrontar prontuário, prescrição, checagem, evolução e conta hospitalar para corrigir ou justificar divergências."
+  },
+  {
+    "categoria": "Auditoria",
+    "subcategoria": "Ausência de comprovação assistencial",
+    "palavras_chave": ["ausência de comprovação assistencial", "sem comprovação assistencial", "não comprovado no prontuário", "sem evidência assistencial"],
+    "chance_recuperacao": 56,
+    "prioridade": "Alta",
+    "recomendacao": "Anexar registros assistenciais que comprovem execução, necessidade e pertinência do item cobrado."
+  },
+  {
+    "categoria": "Auditoria",
+    "subcategoria": "Item incompatível com evolução",
+    "palavras_chave": ["item incompatível com evolução", "cobrança incompatível com evolução", "item não compatível com evolução", "evolução não justifica item"],
+    "chance_recuperacao": 52,
+    "prioridade": "Alta",
+    "recomendacao": "Revisar evolução clínica e justificar tecnicamente a pertinência do item cobrado."
   }
 ]

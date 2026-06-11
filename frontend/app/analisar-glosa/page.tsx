@@ -1,16 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { ChangeEvent, FormEvent, ReactNode, useRef, useState } from "react";
 import axios from "axios";
 import {
   ArrowLeft,
   Brain,
   CheckCircle2,
+  ClipboardCopy,
   Database,
+  Download,
   FileSearch,
+  FileUp,
   Loader2,
+  ScanLine,
   SearchCheck,
   ShieldCheck,
+  XCircle,
 } from "lucide-react";
 
 type FormData = {
@@ -31,6 +36,18 @@ type ResultadoAnalise = {
   evidencia: string;
 };
 
+type RecursoAdministrativo = {
+  titulo: string;
+  documento: string;
+  categoria: string;
+  prioridade: string;
+  chance_recuperacao: string;
+  valor_glosado_formatado: string;
+  data_emissao: string;
+};
+
+type OcrStatus = "idle" | "processing" | "done";
+
 const initialFormData: FormData = {
   hospital: "",
   convenio: "",
@@ -40,11 +57,29 @@ const initialFormData: FormData = {
   motivo: "",
 };
 
+const dadosExtraidosDemo: FormData = {
+  hospital: "Hospital São Gabriel",
+  convenio: "Unimed",
+  cid: "I21",
+  procedimento: "Angioplastia coronariana",
+  valor_glosado: "12500",
+  motivo: "Ausência de autorização prévia",
+};
+
 export default function AnalisarGlosaPage() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [resultado, setResultado] = useState<ResultadoAnalise | null>(null);
+  const [recurso, setRecurso] = useState<RecursoAdministrativo | null>(null);
+  const [arquivoPdf, setArquivoPdf] = useState<File | null>(null);
+  const [ocrStatus, setOcrStatus] = useState<OcrStatus>("idle");
   const [loading, setLoading] = useState(false);
+  const [gerandoRecurso, setGerandoRecurso] = useState(false);
+  const [exportandoPdf, setExportandoPdf] = useState(false);
+  const [documentoCopiado, setDocumentoCopiado] = useState(false);
   const [erro, setErro] = useState("");
+
+  const inputArquivoRef = useRef<HTMLInputElement | null>(null);
+  const ocrTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function updateField(field: keyof FormData, value: string) {
     setFormData((current) => ({
@@ -53,11 +88,64 @@ export default function AnalisarGlosaPage() {
     }));
   }
 
-  async function analisarCaso(event: React.FormEvent<HTMLFormElement>) {
+  function selecionarArquivo(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      setErro("Selecione apenas arquivos PDF.");
+      return;
+    }
+
+    if (ocrTimeoutRef.current) {
+      clearTimeout(ocrTimeoutRef.current);
+    }
+
+    setErro("");
+    setArquivoPdf(file);
+    setResultado(null);
+    setRecurso(null);
+    setDocumentoCopiado(false);
+    setOcrStatus("processing");
+
+    ocrTimeoutRef.current = setTimeout(() => {
+      setFormData(dadosExtraidosDemo);
+      setOcrStatus("done");
+    }, 900);
+  }
+
+  function removerArquivo() {
+    if (ocrTimeoutRef.current) {
+      clearTimeout(ocrTimeoutRef.current);
+    }
+
+    setArquivoPdf(null);
+    setOcrStatus("idle");
+
+    if (inputArquivoRef.current) {
+      inputArquivoRef.current.value = "";
+    }
+  }
+
+  function getPayload() {
+    return {
+      hospital: formData.hospital,
+      convenio: formData.convenio,
+      cid: formData.cid,
+      procedimento: formData.procedimento,
+      valor_glosado: Number(formData.valor_glosado),
+      motivo: formData.motivo,
+    };
+  }
+
+  async function analisarCaso(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
     setErro("");
     setResultado(null);
+    setRecurso(null);
+    setDocumentoCopiado(false);
 
     try {
       const apiUrl =
@@ -65,14 +153,7 @@ export default function AnalisarGlosaPage() {
 
       const response = await axios.post<ResultadoAnalise>(
         `${apiUrl}/api/glosa/analisar`,
-        {
-          hospital: formData.hospital,
-          convenio: formData.convenio,
-          cid: formData.cid,
-          procedimento: formData.procedimento,
-          valor_glosado: Number(formData.valor_glosado),
-          motivo: formData.motivo,
-        }
+        getPayload()
       );
 
       setResultado(response.data);
@@ -83,6 +164,69 @@ export default function AnalisarGlosaPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function gerarRecurso() {
+    setGerandoRecurso(true);
+    setErro("");
+    setDocumentoCopiado(false);
+
+    try {
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
+      const response = await axios.post<RecursoAdministrativo>(
+        `${apiUrl}/api/glosa/gerar-recurso`,
+        getPayload()
+      );
+
+      setRecurso(response.data);
+    } catch {
+      setErro("Não foi possível gerar o recurso administrativo.");
+    } finally {
+      setGerandoRecurso(false);
+    }
+  }
+
+  async function exportarPdf() {
+    setExportandoPdf(true);
+    setErro("");
+
+    try {
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
+      const response = await axios.post(
+        `${apiUrl}/api/glosa/gerar-pdf`,
+        getPayload(),
+        {
+          responseType: "blob",
+        }
+      );
+
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = "ELOS_Recurso_Administrativo.pdf";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
+    } catch {
+      setErro("Não foi possível exportar o PDF.");
+    } finally {
+      setExportandoPdf(false);
+    }
+  }
+
+  async function copiarDocumento() {
+    if (!recurso?.documento) return;
+
+    await navigator.clipboard.writeText(recurso.documento);
+    setDocumentoCopiado(true);
   }
 
   return (
@@ -193,6 +337,105 @@ export default function AnalisarGlosaPage() {
                 className="min-h-32 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-blue-300"
               />
             </div>
+
+            <div className="md:col-span-2">
+              <label className="mb-2 block text-sm font-medium text-slate-200">
+                Documento Hospitalar (PDF)
+              </label>
+
+              <div className="rounded-2xl border border-dashed border-blue-300/30 bg-slate-950 p-5">
+                <div className="flex items-center gap-3 text-blue-200">
+                  <FileUp className="h-5 w-5" />
+                  <p className="font-medium">Anexar documento do caso</p>
+                </div>
+
+                <p className="mt-2 text-sm leading-6 text-slate-400">
+                  Anexe prontuário, guia, autorização, conta hospitalar ou outro
+                  documento de apoio em PDF.
+                </p>
+
+                <input
+                  ref={inputArquivoRef}
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  onChange={selecionarArquivo}
+                  className="mt-4 block w-full text-sm text-slate-300 file:mr-4 file:rounded-full file:border-0 file:bg-[#005CA9] file:px-5 file:py-3 file:text-sm file:font-semibold file:text-white hover:file:bg-[#1E73BE]"
+                />
+
+                {ocrStatus === "processing" && (
+                  <div className="mt-4 rounded-xl border border-blue-300/20 bg-blue-300/10 p-4">
+                    <div className="flex items-center gap-2 text-blue-200">
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <p className="text-sm font-semibold">
+                        Processando documento com OCR simulado...
+                      </p>
+                    </div>
+                    <p className="mt-2 text-sm text-slate-400">
+                      Extraindo dados assistenciais e administrativos do PDF.
+                    </p>
+                  </div>
+                )}
+
+                {arquivoPdf && (
+                  <div className="mt-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2 text-emerald-300">
+                          <CheckCircle2 className="h-5 w-5" />
+                          <p className="text-sm font-semibold">
+                            Documento carregado
+                          </p>
+                        </div>
+
+                        <p className="mt-2 text-sm text-white">
+                          {arquivoPdf.name}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-400">
+                          {(arquivoPdf.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={removerArquivo}
+                        className="inline-flex items-center gap-2 rounded-full border border-red-400/30 px-3 py-2 text-xs font-semibold text-red-300 transition hover:bg-red-400/10"
+                      >
+                        <XCircle className="h-4 w-4" />
+                        Remover
+                      </button>
+                    </div>
+
+                    {ocrStatus === "done" && (
+                      <div className="mt-4 rounded-2xl border border-white/10 bg-slate-950 p-4">
+                        <div className="mb-3 flex items-center gap-2 text-blue-200">
+                          <ScanLine className="h-5 w-5" />
+                          <p className="text-sm font-semibold">
+                            OCR simulado concluído
+                          </p>
+                        </div>
+
+                        <div className="grid gap-3 text-sm md:grid-cols-2">
+                          <MiniData label="Hospital" value={formData.hospital} />
+                          <MiniData label="Convênio" value={formData.convenio} />
+                          <MiniData label="CID" value={formData.cid} />
+                          <MiniData
+                            label="Procedimento"
+                            value={formData.procedimento}
+                          />
+                          <MiniData
+                            label="Valor glosado"
+                            value={`R$ ${Number(
+                              formData.valor_glosado || 0
+                            ).toLocaleString("pt-BR")}`}
+                          />
+                          <MiniData label="Motivo" value={formData.motivo} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {erro && (
@@ -203,7 +446,7 @@ export default function AnalisarGlosaPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || ocrStatus === "processing"}
             className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#005CA9] px-7 py-4 font-semibold text-white transition hover:bg-[#1E73BE] disabled:cursor-not-allowed disabled:opacity-70 md:w-auto"
           >
             {loading ? (
@@ -273,13 +516,115 @@ export default function AnalisarGlosaPage() {
                   {resultado.recomendacao}
                 </p>
 
+                {arquivoPdf && (
+                  <div className="mt-4 rounded-2xl border border-white/10 bg-slate-950 p-4">
+                    <p className="text-sm text-slate-400">
+                      Documento de apoio anexado
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-white">
+                      {arquivoPdf.name}
+                    </p>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={gerarRecurso}
+                  disabled={gerandoRecurso}
+                  className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full border border-blue-300/30 bg-slate-950 px-6 py-4 font-semibold text-white transition hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {gerandoRecurso ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Gerando Recurso...
+                    </>
+                  ) : (
+                    <>
+                      Gerar Recurso Administrativo
+                      <ClipboardCopy className="h-5 w-5" />
+                    </>
+                  )}
+                </button>
+
                 <a
                   href="/dashboard"
-                  className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-[#005CA9] px-6 py-4 font-semibold text-white transition hover:bg-[#1E73BE]"
+                  className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-[#005CA9] px-6 py-4 font-semibold text-white transition hover:bg-[#1E73BE]"
                 >
                   Ver Dashboard Executivo
                 </a>
               </div>
+
+              {recurso && (
+                <div className="rounded-3xl border border-emerald-400/20 bg-emerald-400/5 p-6">
+                  <div className="mb-4 flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-300" />
+                    <h3 className="text-xl font-semibold text-white">
+                      {recurso.titulo}
+                    </h3>
+                  </div>
+
+                  <div className="mb-4 grid gap-3 text-sm md:grid-cols-3">
+                    <div className="rounded-2xl border border-white/10 bg-slate-950 p-4">
+                      <p className="text-slate-500">Data</p>
+                      <p className="mt-1 font-semibold text-white">
+                        {recurso.data_emissao}
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-white/10 bg-slate-950 p-4">
+                      <p className="text-slate-500">Valor</p>
+                      <p className="mt-1 font-semibold text-white">
+                        {recurso.valor_glosado_formatado}
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-white/10 bg-slate-950 p-4">
+                      <p className="text-slate-500">Recuperação</p>
+                      <p className="mt-1 font-semibold text-white">
+                        {recurso.chance_recuperacao}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="max-h-[520px] overflow-y-auto rounded-2xl border border-white/10 bg-slate-950 p-5">
+                    <pre className="whitespace-pre-wrap text-sm leading-7 text-slate-300">
+                      {recurso.documento}
+                    </pre>
+                  </div>
+
+                  <div className="mt-5 grid gap-3 md:grid-cols-2">
+                    <button
+                      type="button"
+                      onClick={copiarDocumento}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-600 px-6 py-4 font-semibold text-white transition hover:bg-emerald-500"
+                    >
+                      <ClipboardCopy className="h-5 w-5" />
+                      {documentoCopiado
+                        ? "Documento Copiado"
+                        : "Copiar Documento"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={exportarPdf}
+                      disabled={exportandoPdf}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#005CA9] px-6 py-4 font-semibold text-white transition hover:bg-[#1E73BE] disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      {exportandoPdf ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          Exportando...
+                        </>
+                      ) : (
+                        <>
+                          <Download className="h-5 w-5" />
+                          Exportar PDF
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </aside>
@@ -332,7 +677,7 @@ function InfoCard({
   label,
   value,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   value: string;
 }) {
@@ -341,6 +686,15 @@ function InfoCard({
       <div className="mb-3 flex items-center gap-2 text-blue-200">{icon}</div>
       <p className="text-sm text-slate-400">{label}</p>
       <p className="mt-2 text-base font-semibold text-white">{value}</p>
+    </div>
+  );
+}
+
+function MiniData({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+      <p className="text-xs text-slate-500">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-white">{value}</p>
     </div>
   );
 }
