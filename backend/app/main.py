@@ -1,8 +1,8 @@
+from io import BytesIO
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
-
-from io import BytesIO
 
 from app.schemas import CasoGlosa
 from app.services.glosa_engine import analisar_glosa
@@ -11,7 +11,7 @@ from app.services.pdf_generator import gerar_pdf_recurso
 
 app = FastAPI(
     title="ELOS Consultoria e Gestão Financeira Hospitalar",
-    version="0.3.0"
+    version="0.3.1",
 )
 
 app.add_middleware(
@@ -19,6 +19,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "https://elos-recovery-ai-frontend.vercel.app",
+        "https://elos-recovery-ai-frontend-7klx4tcxr.vercel.app",
     ],
     allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
@@ -26,61 +28,55 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 def root():
     return {
-        "message": "ELOS Consultoria e Gestão Financeira Hospitalar API"
+        "message": "ELOS Consultoria e Gestão Financeira Hospitalar API",
+        "status": "online",
     }
 
 
 @app.get("/health")
 def health():
     return {
-        "status": "ok"
+        "status": "ok",
     }
 
 
 @app.post("/api/glosa/analisar")
 def analisar(caso: CasoGlosa):
-
-    resultado = analisar_glosa(caso)
-
-    return resultado
+    return analisar_glosa(caso)
 
 
 @app.post("/api/glosa/gerar-recurso")
 def gerar_recurso(caso: CasoGlosa):
-
     analise = analisar_glosa(caso)
 
-    recurso = gerar_recurso_administrativo(
+    return gerar_recurso_administrativo(
         dados_glosa=caso.model_dump(),
-        analise=analise
+        analise=analise,
     )
-
-    return recurso
 
 
 @app.post("/api/glosa/gerar-pdf")
 def gerar_pdf(caso: CasoGlosa):
-
     analise = analisar_glosa(caso)
 
     recurso = gerar_recurso_administrativo(
         dados_glosa=caso.model_dump(),
-        analise=analise
+        analise=analise,
     )
 
     pdf_bytes = gerar_pdf_recurso(
         dados_glosa=caso.model_dump(),
-        recurso=recurso
+        recurso=recurso,
     )
 
     return StreamingResponse(
         BytesIO(pdf_bytes),
         media_type="application/pdf",
         headers={
-            "Content-Disposition":
-            'attachment; filename="ELOS_Recurso_Administrativo.pdf"'
-        }
+            "Content-Disposition": 'attachment; filename="ELOS_Recurso_Administrativo.pdf"'
+        },
     )
