@@ -42,7 +42,6 @@ const steps = [
       "Todos os recursos são apoiados por rigorosa curadoria técnica realizada por profissionais com mais de 40 anos de experiência acumulada em auditoria, faturamento hospitalar e recuperação de receitas.",
   },
 ];
-
 const benefits = [
   "Padronização da análise de glosas",
   "Redução de perdas financeiras hospitalares",
@@ -69,9 +68,6 @@ export default function Home() {
           <nav className="hidden items-center gap-8 text-sm text-slate-300 md:flex">
             <a href="#solucao" className="hover:text-white">
               Soluções
-            </a>
-            <a href="/como-funciona" className="hover:text-white">
-              Como Funciona
             </a>
             <a href="#fluxo" className="hover:text-white">
               Serviços
@@ -118,13 +114,6 @@ export default function Home() {
               >
                 Conheça a solução
                 <ArrowRight className="h-5 w-5" />
-              </a>
-
-              <a
-                href="/como-funciona"
-                className="inline-flex items-center justify-center rounded-full border border-white/15 px-7 py-4 font-semibold text-white transition hover:bg-white/10"
-              >
-                Como funciona
               </a>
 
               <a
@@ -278,16 +267,6 @@ export default function Home() {
               );
             })}
           </div>
-
-          <div className="mt-10 flex justify-center">
-            <a
-              href="/como-funciona"
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-blue-300/30 px-7 py-4 font-semibold text-white transition hover:bg-blue-300/10"
-            >
-              Ver jornada completa da solução
-              <ArrowRight className="h-5 w-5" />
-            </a>
-          </div>
         </div>
       </section>
 
@@ -300,7 +279,7 @@ export default function Home() {
               </p>
               <h2 className="mt-4 text-4xl font-semibold tracking-tight md:text-5xl">
                 Nossa Solução é preparada para evoluir e otimizar a análise de
-                eventos assíncronos dentro do fluxo financeiro hospitalar.
+                fluxos assíncronos dentro do fluxo financeiro hospitalar.
               </h2>
               <p className="mt-6 leading-8 text-slate-300">
                 Backend em Python, FastAPI, banco de dados, logs auditáveis e
@@ -364,22 +343,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-            <a
-              href="/dashboard"
-              className="inline-flex items-center justify-center rounded-full bg-[#005CA9] px-7 py-4 font-semibold text-white transition hover:bg-[#1E73BE]"
-            >
-              Acessar Dashboard Executivo
-            </a>
-
-            <a
-              href="/como-funciona"
-              className="inline-flex items-center justify-center rounded-full border border-white/15 px-7 py-4 font-semibold text-white transition hover:bg-white/10"
-            >
-              Entender como funciona
-            </a>
-          </div>
         </div>
       </section>
 
@@ -397,22 +360,6 @@ export default function Home() {
             de receitas hospitalares com base em dados, padronização e
             inteligência operacional.
           </p>
-
-          <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-            <a
-              href="/analisar-glosa"
-              className="inline-flex items-center justify-center rounded-full bg-white px-7 py-4 font-semibold text-slate-950 transition hover:bg-blue-100"
-            >
-              Realizar análise
-            </a>
-
-            <a
-              href="/como-funciona"
-              className="inline-flex items-center justify-center rounded-full border border-white/15 px-7 py-4 font-semibold text-white transition hover:bg-white/10"
-            >
-              Ver como funciona
-            </a>
-          </div>
         </div>
       </section>
 
