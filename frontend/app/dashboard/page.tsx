@@ -1,234 +1,96 @@
-"use client";
-
-import { ChangeEvent, FormEvent, ReactNode, useRef, useState } from "react";
-import axios from "axios";
 import {
   ArrowLeft,
-  Brain,
-  CheckCircle2,
-  ClipboardCopy,
-  Database,
-  Download,
-  FileSearch,
-  FileUp,
-  Loader2,
-  ScanLine,
-  SearchCheck,
-  ShieldCheck,
-  XCircle,
+  BarChart3,
+  Building2,
+  ClipboardList,
+  FileWarning,
+  LineChart,
+  PieChart,
+  TrendingUp,
+  Wallet,
 } from "lucide-react";
 
-type FormData = {
-  hospital: string;
-  convenio: string;
-  cid: string;
-  procedimento: string;
-  valor_glosado: string;
-  motivo: string;
-};
+const kpis = [
+  {
+    label: "Casos analisados",
+    value: "1.248",
+    detail: "volume total monitorado",
+    icon: ClipboardList,
+  },
+  {
+    label: "Valor total glosado",
+    value: "R$ 4,8M",
+    detail: "em contas auditadas",
+    icon: Wallet,
+  },
+  {
+    label: "Potencial recuperável",
+    value: "R$ 3,1M",
+    detail: "estimativa por classificação",
+    icon: TrendingUp,
+  },
+  {
+    label: "Taxa média de recuperação",
+    value: "64%",
+    detail: "média estimada",
+    icon: BarChart3,
+  },
+];
 
-type ResultadoAnalise = {
-  categoria: string;
-  prioridade: string;
-  chance_recuperacao: number;
-  recomendacao: string;
-  fonte: string;
-  evidencia: string;
-};
+const categorias = [
+  { nome: "Documentação", valor: "38%", largura: "38%" },
+  { nome: "CID/TUSS", valor: "24%", largura: "24%" },
+  { nome: "Autorização", valor: "18%", largura: "18%" },
+  { nome: "Material/Medicamento", valor: "14%", largura: "14%" },
+  { nome: "Prazo ou Envio", valor: "6%", largura: "6%" },
+];
 
-type RecursoAdministrativo = {
-  titulo: string;
-  documento: string;
-  categoria: string;
-  prioridade: string;
-  chance_recuperacao: string;
-  valor_glosado_formatado: string;
-  data_emissao: string;
-};
+const convenios = [
+  { nome: "Unimed", valor: "R$ 1,42M", casos: "342 casos" },
+  { nome: "Bradesco Saúde", valor: "R$ 980 mil", casos: "251 casos" },
+  { nome: "SulAmérica", valor: "R$ 740 mil", casos: "188 casos" },
+  { nome: "Amil", valor: "R$ 520 mil", casos: "132 casos" },
+];
 
-type OcrStatus = "idle" | "processing" | "done";
+const hospitais = [
+  { nome: "Hospital Santa Clara", valor: "R$ 1,18M", risco: "Alto" },
+  { nome: "Hospital Vida", valor: "R$ 870 mil", risco: "Médio" },
+  { nome: "Clínica São Lucas", valor: "R$ 410 mil", risco: "Baixo" },
+  { nome: "Hospital Esperança", valor: "R$ 940 mil", risco: "Alto" },
+];
 
-const initialFormData: FormData = {
-  hospital: "",
-  convenio: "",
-  cid: "",
-  procedimento: "",
-  valor_glosado: "",
-  motivo: "",
-};
+const casosRecentes = [
+  {
+    hospital: "Santa Casa",
+    convenio: "Bradesco Saúde",
+    categoria: "Documentação",
+    valor: "R$ 4.500",
+    chance: "82%",
+  },
+  {
+    hospital: "Hospital Vida",
+    convenio: "Unimed",
+    categoria: "CID/TUSS",
+    valor: "R$ 8.200",
+    chance: "74%",
+  },
+  {
+    hospital: "Clínica São Lucas",
+    convenio: "SulAmérica",
+    categoria: "Autorização",
+    valor: "R$ 3.750",
+    chance: "68%",
+  },
+  {
+    hospital: "Hospital Esperança",
+    convenio: "Amil",
+    categoria: "Material/Medicamento",
+    valor: "R$ 11.900",
+    chance: "70%",
+  },
+];
 
-const dadosExtraidosDemo: FormData = {
-  hospital: "Hospital São Gabriel",
-  convenio: "Unimed",
-  cid: "I21",
-  procedimento: "Angioplastia coronariana",
-  valor_glosado: "12500",
-  motivo: "Ausência de autorização prévia",
-};
-
-export default function AnalisarGlosaPage() {
-  const [formData, setFormData] = useState<FormData>(initialFormData);
-  const [resultado, setResultado] = useState<ResultadoAnalise | null>(null);
-  const [recurso, setRecurso] = useState<RecursoAdministrativo | null>(null);
-  const [arquivoPdf, setArquivoPdf] = useState<File | null>(null);
-  const [ocrStatus, setOcrStatus] = useState<OcrStatus>("idle");
-  const [loading, setLoading] = useState(false);
-  const [gerandoRecurso, setGerandoRecurso] = useState(false);
-  const [exportandoPdf, setExportandoPdf] = useState(false);
-  const [documentoCopiado, setDocumentoCopiado] = useState(false);
-  const [erro, setErro] = useState("");
-
-  const inputArquivoRef = useRef<HTMLInputElement | null>(null);
-  const ocrTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  function updateField(field: keyof FormData, value: string) {
-    setFormData((current) => ({
-      ...current,
-      [field]: value,
-    }));
-  }
-
-  function selecionarArquivo(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-
-    if (!file) return;
-
-    if (file.type !== "application/pdf") {
-      setErro("Selecione apenas arquivos PDF.");
-      return;
-    }
-
-    if (ocrTimeoutRef.current) {
-      clearTimeout(ocrTimeoutRef.current);
-    }
-
-    setErro("");
-    setArquivoPdf(file);
-    setResultado(null);
-    setRecurso(null);
-    setDocumentoCopiado(false);
-    setOcrStatus("processing");
-
-    ocrTimeoutRef.current = setTimeout(() => {
-      setFormData(dadosExtraidosDemo);
-      setOcrStatus("done");
-    }, 900);
-  }
-
-  function removerArquivo() {
-    if (ocrTimeoutRef.current) {
-      clearTimeout(ocrTimeoutRef.current);
-    }
-
-    setArquivoPdf(null);
-    setOcrStatus("idle");
-
-    if (inputArquivoRef.current) {
-      inputArquivoRef.current.value = "";
-    }
-  }
-
-  function getPayload() {
-    return {
-      hospital: formData.hospital,
-      convenio: formData.convenio,
-      cid: formData.cid,
-      procedimento: formData.procedimento,
-      valor_glosado: Number(formData.valor_glosado),
-      motivo: formData.motivo,
-    };
-  }
-
-  async function analisarCaso(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setLoading(true);
-    setErro("");
-    setResultado(null);
-    setRecurso(null);
-    setDocumentoCopiado(false);
-
-    try {
-      const apiUrl =
-        process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-
-      const response = await axios.post<ResultadoAnalise>(
-        `${apiUrl}/api/glosa/analisar`,
-        getPayload()
-      );
-
-      setResultado(response.data);
-    } catch {
-      setErro(
-        "Não foi possível analisar o caso. Verifique se o backend FastAPI está rodando na porta 8000."
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function gerarRecurso() {
-    setGerandoRecurso(true);
-    setErro("");
-    setDocumentoCopiado(false);
-
-    try {
-      const apiUrl =
-        process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-
-      const response = await axios.post<RecursoAdministrativo>(
-        `${apiUrl}/api/glosa/gerar-recurso`,
-        getPayload()
-      );
-
-      setRecurso(response.data);
-    } catch {
-      setErro("Não foi possível gerar o recurso administrativo.");
-    } finally {
-      setGerandoRecurso(false);
-    }
-  }
-
-  async function exportarPdf() {
-    setExportandoPdf(true);
-    setErro("");
-
-    try {
-      const apiUrl =
-        process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-
-      const response = await axios.post(
-        `${apiUrl}/api/glosa/gerar-pdf`,
-        getPayload(),
-        {
-          responseType: "blob",
-        }
-      );
-
-      const blob = new Blob([response.data], { type: "application/pdf" });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-
-      link.href = url;
-      link.download = "ELOS_Recurso_Administrativo.pdf";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-
-      window.URL.revokeObjectURL(url);
-    } catch {
-      setErro("Não foi possível exportar o PDF.");
-    } finally {
-      setExportandoPdf(false);
-    }
-  }
-
-  async function copiarDocumento() {
-    if (!recurso?.documento) return;
-
-    await navigator.clipboard.writeText(recurso.documento);
-    setDocumentoCopiado(true);
-  }
-
+export default function DashboardPage() {
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <section className="relative overflow-hidden border-b border-white/10">
@@ -236,11 +98,11 @@ export default function AnalisarGlosaPage() {
 
         <header className="relative mx-auto flex max-w-7xl items-center justify-between px-6 py-8">
           <a
-            href="/"
+            href="/analisar-glosa"
             className="inline-flex items-center gap-2 text-sm font-medium text-slate-300 transition hover:text-white"
           >
             <ArrowLeft className="h-4 w-4" />
-            Voltar para página inicial
+            Nova análise
           </a>
 
           <img
@@ -250,451 +112,221 @@ export default function AnalisarGlosaPage() {
           />
         </header>
 
-        <div className="relative mx-auto max-w-7xl px-6 pb-20 pt-10">
+        <div className="relative mx-auto max-w-7xl px-6 pb-16 pt-8">
           <div className="max-w-4xl">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-300/20 bg-blue-300/10 px-4 py-2 text-sm text-blue-200">
-              <Brain className="h-4 w-4" />
-              Módulo funcional de análise de glosas
+              <LineChart className="h-4 w-4" />
+              Painel executivo de glosas e recuperação de receitas
             </div>
 
             <h1 className="text-4xl font-semibold tracking-tight md:text-6xl">
-              Análise inteligente de glosas hospitalares.
+              Dashboard Executivo.
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-              Informe os dados do caso para classificar a glosa, estimar a
-              chance de recuperação e gerar uma recomendação inicial para apoio
-              ao recurso técnico.
+              Visão consolidada de perdas financeiras, potencial de recuperação,
+              categorias de glosa, convênios, hospitais e casos recentes para
+              suporte à tomada de decisão.
             </p>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-8 px-6 py-12 lg:grid-cols-[1fr_0.9fr]">
-        <form
-          onSubmit={analisarCaso}
-          className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 md:p-8"
-        >
-          <div className="mb-8 flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-300/10">
-              <FileSearch className="h-6 w-6 text-blue-300" />
-            </div>
-
-            <div>
-              <h2 className="text-2xl font-semibold">Dados do caso</h2>
-              <p className="mt-1 text-sm text-slate-400">
-                Preencha as informações principais da glosa.
-              </p>
-            </div>
+      <section className="mx-auto max-w-7xl px-6 py-10">
+        <div className="mb-8 flex flex-col justify-between gap-4 rounded-[2rem] border border-blue-300/20 bg-blue-300/10 p-6 md:flex-row md:items-center">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.28em] text-blue-300">
+              Trilha da demonstração
+            </p>
+            <p className="mt-3 text-lg text-slate-200">
+  Página Inicial → Conheça a Solução → Resultado da Análise →
+  Dashboard Executivo
+</p>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-2">
-            <Input
-              label="Hospital ou Clínica"
-              value={formData.hospital}
-              onChange={(value) => updateField("hospital", value)}
-              placeholder="Ex.: Hospital Santa Clara"
-            />
-
-            <Input
-              label="Convênio"
-              value={formData.convenio}
-              onChange={(value) => updateField("convenio", value)}
-              placeholder="Ex.: Unimed"
-            />
-
-            <Input
-              label="CID"
-              value={formData.cid}
-              onChange={(value) => updateField("cid", value)}
-              placeholder="Ex.: I21"
-            />
-
-            <Input
-              label="Procedimento"
-              value={formData.procedimento}
-              onChange={(value) => updateField("procedimento", value)}
-              placeholder="Ex.: Cateterismo"
-            />
-
-            <Input
-              label="Valor Glosado"
-              value={formData.valor_glosado}
-              onChange={(value) => updateField("valor_glosado", value)}
-              placeholder="Ex.: 4500"
-              type="number"
-            />
-
-            <div className="md:col-span-2">
-              <label className="mb-2 block text-sm font-medium text-slate-200">
-                Motivo da Glosa
-              </label>
-              <textarea
-                required
-                value={formData.motivo}
-                onChange={(event) => updateField("motivo", event.target.value)}
-                placeholder="Ex.: Ausência de documentação complementar"
-                className="min-h-32 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-blue-300"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="mb-2 block text-sm font-medium text-slate-200">
-                Documento Hospitalar (PDF)
-              </label>
-
-              <div className="rounded-2xl border border-dashed border-blue-300/30 bg-slate-950 p-5">
-                <div className="flex items-center gap-3 text-blue-200">
-                  <FileUp className="h-5 w-5" />
-                  <p className="font-medium">Anexar documento do caso</p>
-                </div>
-
-                <p className="mt-2 text-sm leading-6 text-slate-400">
-                  Anexe prontuário, guia, autorização, conta hospitalar ou outro
-                  documento de apoio em PDF.
-                </p>
-
-                <input
-                  ref={inputArquivoRef}
-                  type="file"
-                  accept=".pdf,application/pdf"
-                  onChange={selecionarArquivo}
-                  className="mt-4 block w-full text-sm text-slate-300 file:mr-4 file:rounded-full file:border-0 file:bg-[#005CA9] file:px-5 file:py-3 file:text-sm file:font-semibold file:text-white hover:file:bg-[#1E73BE]"
-                />
-
-                {ocrStatus === "processing" && (
-                  <div className="mt-4 rounded-xl border border-blue-300/20 bg-blue-300/10 p-4">
-                    <div className="flex items-center gap-2 text-blue-200">
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      <p className="text-sm font-semibold">
-                        Processando documento com OCR simulado...
-                      </p>
-                    </div>
-                    <p className="mt-2 text-sm text-slate-400">
-                      Extraindo dados assistenciais e administrativos do PDF.
-                    </p>
-                  </div>
-                )}
-
-                {arquivoPdf && (
-                  <div className="mt-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <div className="flex items-center gap-2 text-emerald-300">
-                          <CheckCircle2 className="h-5 w-5" />
-                          <p className="text-sm font-semibold">
-                            Documento carregado
-                          </p>
-                        </div>
-
-                        <p className="mt-2 text-sm text-white">
-                          {arquivoPdf.name}
-                        </p>
-                        <p className="mt-1 text-xs text-slate-400">
-                          {(arquivoPdf.size / 1024 / 1024).toFixed(2)} MB
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={removerArquivo}
-                        className="inline-flex items-center gap-2 rounded-full border border-red-400/30 px-3 py-2 text-xs font-semibold text-red-300 transition hover:bg-red-400/10"
-                      >
-                        <XCircle className="h-4 w-4" />
-                        Remover
-                      </button>
-                    </div>
-
-                    {ocrStatus === "done" && (
-                      <div className="mt-4 rounded-2xl border border-white/10 bg-slate-950 p-4">
-                        <div className="mb-3 flex items-center gap-2 text-blue-200">
-                          <ScanLine className="h-5 w-5" />
-                          <p className="text-sm font-semibold">
-                            OCR simulado concluído
-                          </p>
-                        </div>
-
-                        <div className="grid gap-3 text-sm md:grid-cols-2">
-                          <MiniData label="Hospital" value={formData.hospital} />
-                          <MiniData label="Convênio" value={formData.convenio} />
-                          <MiniData label="CID" value={formData.cid} />
-                          <MiniData
-                            label="Procedimento"
-                            value={formData.procedimento}
-                          />
-                          <MiniData
-                            label="Valor glosado"
-                            value={`R$ ${Number(
-                              formData.valor_glosado || 0
-                            ).toLocaleString("pt-BR")}`}
-                          />
-                          <MiniData label="Motivo" value={formData.motivo} />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {erro && (
-            <div className="mt-6 rounded-2xl border border-red-400/20 bg-red-400/10 p-4 text-sm text-red-200">
-              {erro}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading || ocrStatus === "processing"}
-            className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#005CA9] px-7 py-4 font-semibold text-white transition hover:bg-[#1E73BE] disabled:cursor-not-allowed disabled:opacity-70 md:w-auto"
+          <a
+            href="/analisar-glosa"
+            className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-blue-100"
           >
-            {loading ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin" />
-                Analisando caso...
-              </>
-            ) : (
-              <>
-                Analisar Caso
-                <Brain className="h-5 w-5" />
-              </>
-            )}
-          </button>
-        </form>
+            Realizar nova análise
+          </a>
+        </div>
 
-        <aside className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 md:p-8">
-          <div className="mb-8 flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-300/10">
-              <ShieldCheck className="h-6 w-6 text-blue-300" />
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          {kpis.map((kpi) => {
+            const Icon = kpi.icon;
+
+            return (
+              <div
+                key={kpi.label}
+                className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6"
+              >
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-300/10">
+                  <Icon className="h-6 w-6 text-blue-300" />
+                </div>
+
+                <p className="text-sm text-slate-400">{kpi.label}</p>
+                <p className="mt-2 text-3xl font-semibold">{kpi.value}</p>
+                <p className="mt-2 text-sm text-slate-500">{kpi.detail}</p>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_0.9fr]">
+          <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 md:p-8">
+            <div className="mb-8 flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-300/10">
+                <PieChart className="h-6 w-6 text-blue-300" />
+              </div>
+
+              <div>
+                <h2 className="text-2xl font-semibold">
+                  Glosas por categoria
+                </h2>
+                <p className="mt-1 text-sm text-slate-400">
+                  Distribuição dos principais motivos identificados.
+                </p>
+              </div>
             </div>
 
-            <div>
-              <h2 className="text-2xl font-semibold">Resultado da análise</h2>
-              <p className="mt-1 text-sm text-slate-400">
-                Retorno gerado pela API FastAPI.
-              </p>
+            <div className="space-y-5">
+              {categorias.map((categoria) => (
+                <div key={categoria.nome}>
+                  <div className="mb-2 flex items-center justify-between text-sm">
+                    <span className="text-slate-300">{categoria.nome}</span>
+                    <span className="font-medium text-blue-200">
+                      {categoria.valor}
+                    </span>
+                  </div>
+
+                  <div className="h-3 rounded-full bg-white/10">
+                    <div
+                      className="h-3 rounded-full bg-[#005CA9]"
+                      style={{ width: categoria.largura }}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          {!resultado ? (
-            <div className="rounded-3xl border border-dashed border-white/10 p-8 text-center">
-              <p className="text-slate-400">
-                O resultado aparecerá aqui após o envio do formulário.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-5">
-              <ResultCard label="Categoria" value={resultado.categoria} />
-              <ResultCard label="Prioridade" value={resultado.prioridade} />
-              <ResultCard
-                label="Chance de Recuperação"
-                value={`${resultado.chance_recuperacao}%`}
-              />
-
-              <div className="grid gap-5 md:grid-cols-2">
-                <InfoCard
-                  icon={<Database className="h-5 w-5" />}
-                  label="Fonte da análise"
-                  value={resultado.fonte}
-                />
-
-                <InfoCard
-                  icon={<SearchCheck className="h-5 w-5" />}
-                  label="Evidência encontrada"
-                  value={resultado.evidencia}
-                />
+          <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 md:p-8">
+            <div className="mb-8 flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-300/10">
+                <FileWarning className="h-6 w-6 text-blue-300" />
               </div>
 
-              <div className="rounded-3xl border border-blue-300/20 bg-blue-300/10 p-5">
-                <div className="mb-3 flex items-center gap-2 text-blue-200">
-                  <CheckCircle2 className="h-5 w-5" />
-                  <p className="font-semibold">Recomendação</p>
-                </div>
-
-                <p className="leading-7 text-slate-300">
-                  {resultado.recomendacao}
+              <div>
+                <h2 className="text-2xl font-semibold">Casos recentes</h2>
+                <p className="mt-1 text-sm text-slate-400">
+                  Últimas análises classificadas pelo motor de conhecimento.
                 </p>
-
-                {arquivoPdf && (
-                  <div className="mt-4 rounded-2xl border border-white/10 bg-slate-950 p-4">
-                    <p className="text-sm text-slate-400">
-                      Documento de apoio anexado
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-white">
-                      {arquivoPdf.name}
-                    </p>
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  onClick={gerarRecurso}
-                  disabled={gerandoRecurso}
-                  className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full border border-blue-300/30 bg-slate-950 px-6 py-4 font-semibold text-white transition hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  {gerandoRecurso ? (
-                    <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      Gerando Recurso...
-                    </>
-                  ) : (
-                    <>
-                      Gerar Recurso Administrativo
-                      <ClipboardCopy className="h-5 w-5" />
-                    </>
-                  )}
-                </button>
-
-                <a
-                  href="/dashboard"
-                  className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-[#005CA9] px-6 py-4 font-semibold text-white transition hover:bg-[#1E73BE]"
-                >
-                  Ver Dashboard Executivo
-                </a>
               </div>
+            </div>
 
-              {recurso && (
-                <div className="rounded-3xl border border-emerald-400/20 bg-emerald-400/5 p-6">
-                  <div className="mb-4 flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-emerald-300" />
-                    <h3 className="text-xl font-semibold text-white">
-                      {recurso.titulo}
-                    </h3>
-                  </div>
-
-                  <div className="mb-4 grid gap-3 text-sm md:grid-cols-3">
-                    <div className="rounded-2xl border border-white/10 bg-slate-950 p-4">
-                      <p className="text-slate-500">Data</p>
-                      <p className="mt-1 font-semibold text-white">
-                        {recurso.data_emissao}
+            <div className="space-y-4">
+              {casosRecentes.map((caso) => (
+                <div
+                  key={`${caso.hospital}-${caso.valor}`}
+                  className="rounded-3xl border border-white/10 bg-slate-950 p-5"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="font-semibold">{caso.hospital}</p>
+                      <p className="mt-1 text-sm text-slate-400">
+                        {caso.convenio} • {caso.categoria}
                       </p>
                     </div>
 
-                    <div className="rounded-2xl border border-white/10 bg-slate-950 p-4">
-                      <p className="text-slate-500">Valor</p>
-                      <p className="mt-1 font-semibold text-white">
-                        {recurso.valor_glosado_formatado}
+                    <div className="text-right">
+                      <p className="font-semibold text-white">{caso.valor}</p>
+                      <p className="mt-1 text-sm text-blue-200">
+                        {caso.chance} recuperável
                       </p>
                     </div>
-
-                    <div className="rounded-2xl border border-white/10 bg-slate-950 p-4">
-                      <p className="text-slate-500">Recuperação</p>
-                      <p className="mt-1 font-semibold text-white">
-                        {recurso.chance_recuperacao}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="max-h-[520px] overflow-y-auto rounded-2xl border border-white/10 bg-slate-950 p-5">
-                    <pre className="whitespace-pre-wrap text-sm leading-7 text-slate-300">
-                      {recurso.documento}
-                    </pre>
-                  </div>
-
-                  <div className="mt-5 grid gap-3 md:grid-cols-2">
-                    <button
-                      type="button"
-                      onClick={copiarDocumento}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-600 px-6 py-4 font-semibold text-white transition hover:bg-emerald-500"
-                    >
-                      <ClipboardCopy className="h-5 w-5" />
-                      {documentoCopiado
-                        ? "Documento Copiado"
-                        : "Copiar Documento"}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={exportarPdf}
-                      disabled={exportandoPdf}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#005CA9] px-6 py-4 font-semibold text-white transition hover:bg-[#1E73BE] disabled:cursor-not-allowed disabled:opacity-70"
-                    >
-                      {exportandoPdf ? (
-                        <>
-                          <Loader2 className="h-5 w-5 animate-spin" />
-                          Exportando...
-                        </>
-                      ) : (
-                        <>
-                          <Download className="h-5 w-5" />
-                          Exportar PDF
-                        </>
-                      )}
-                    </button>
                   </div>
                 </div>
-              )}
+              ))}
             </div>
-          )}
-        </aside>
+          </div>
+        </div>
+
+        <div className="mt-8 grid gap-8 lg:grid-cols-2">
+          <RankingCard
+            icon={<Building2 className="h-6 w-6 text-blue-300" />}
+            title="Top convênios por valor glosado"
+            description="Convênios com maior impacto financeiro acumulado."
+            items={convenios.map((convenio) => ({
+              primary: convenio.nome,
+              secondary: convenio.casos,
+              value: convenio.valor,
+            }))}
+          />
+
+          <RankingCard
+            icon={<BarChart3 className="h-6 w-6 text-blue-300" />}
+            title="Top hospitais por exposição financeira"
+            description="Unidades com maior volume de valores em análise."
+            items={hospitais.map((hospital) => ({
+              primary: hospital.nome,
+              secondary: `Risco operacional: ${hospital.risco}`,
+              value: hospital.valor,
+            }))}
+          />
+        </div>
       </section>
     </main>
   );
 }
 
-function Input({
-  label,
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-  type?: string;
-}) {
-  return (
-    <div>
-      <label className="mb-2 block text-sm font-medium text-slate-200">
-        {label}
-      </label>
-      <input
-        required
-        type={type}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-blue-300"
-      />
-    </div>
-  );
-}
-
-function ResultCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-3xl border border-white/10 bg-slate-950 p-5">
-      <p className="text-sm text-slate-400">{label}</p>
-      <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
-    </div>
-  );
-}
-
-function InfoCard({
+function RankingCard({
   icon,
-  label,
-  value,
+  title,
+  description,
+  items,
 }: {
-  icon: ReactNode;
-  label: string;
-  value: string;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  items: {
+    primary: string;
+    secondary: string;
+    value: string;
+  }[];
 }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-950 p-5">
-      <div className="mb-3 flex items-center gap-2 text-blue-200">{icon}</div>
-      <p className="text-sm text-slate-400">{label}</p>
-      <p className="mt-2 text-base font-semibold text-white">{value}</p>
-    </div>
-  );
-}
+    <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 md:p-8">
+      <div className="mb-8 flex items-center gap-3">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-300/10">
+          {icon}
+        </div>
 
-function MiniData({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-1 text-sm font-semibold text-white">{value}</p>
+        <div>
+          <h2 className="text-2xl font-semibold">{title}</h2>
+          <p className="mt-1 text-sm text-slate-400">{description}</p>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        {items.map((item, index) => (
+          <div
+            key={item.primary}
+            className="grid grid-cols-[auto_1fr_auto] items-center gap-4 rounded-3xl border border-white/10 bg-slate-950 p-5"
+          >
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-300/10 text-sm font-semibold text-blue-200">
+              {index + 1}
+            </div>
+
+            <div>
+              <p className="font-semibold">{item.primary}</p>
+              <p className="mt-1 text-sm text-slate-400">{item.secondary}</p>
+            </div>
+
+            <p className="font-semibold text-white">{item.value}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
