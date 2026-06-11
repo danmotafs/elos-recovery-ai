@@ -300,7 +300,7 @@ export default function Home() {
               </p>
               <h2 className="mt-4 text-4xl font-semibold tracking-tight md:text-5xl">
                 Nossa Solução é preparada para evoluir e otimizar a análise de
-                fluxos assíncronos dentro do fluxo financeiro hospitalar.
+                eventos assíncronos dentro do fluxo financeiro hospitalar.
               </h2>
               <p className="mt-6 leading-8 text-slate-300">
                 Backend em Python, FastAPI, banco de dados, logs auditáveis e
