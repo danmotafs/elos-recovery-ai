@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FormEvent, ReactNode, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, ReactNode, useState } from "react";
 import axios from "axios";
 import {
   ArrowLeft,
@@ -12,10 +12,8 @@ import {
   FileSearch,
   FileUp,
   Loader2,
-  ScanLine,
   SearchCheck,
   ShieldCheck,
-  XCircle,
 } from "lucide-react";
 
 type FormData = {
@@ -46,8 +44,6 @@ type RecursoAdministrativo = {
   data_emissao: string;
 };
 
-type OcrStatus = "idle" | "processing" | "done";
-
 const initialFormData: FormData = {
   hospital: "",
   convenio: "",
@@ -57,29 +53,16 @@ const initialFormData: FormData = {
   motivo: "",
 };
 
-const dadosExtraidosDemo: FormData = {
-  hospital: "Hospital São Gabriel",
-  convenio: "Unimed",
-  cid: "I21",
-  procedimento: "Angioplastia coronariana",
-  valor_glosado: "12500",
-  motivo: "Ausência de autorização prévia",
-};
-
 export default function AnalisarGlosaPage() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [resultado, setResultado] = useState<ResultadoAnalise | null>(null);
   const [recurso, setRecurso] = useState<RecursoAdministrativo | null>(null);
   const [arquivoPdf, setArquivoPdf] = useState<File | null>(null);
-  const [ocrStatus, setOcrStatus] = useState<OcrStatus>("idle");
   const [loading, setLoading] = useState(false);
   const [gerandoRecurso, setGerandoRecurso] = useState(false);
   const [exportandoPdf, setExportandoPdf] = useState(false);
   const [documentoCopiado, setDocumentoCopiado] = useState(false);
   const [erro, setErro] = useState("");
-
-  const inputArquivoRef = useRef<HTMLInputElement | null>(null);
-  const ocrTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function updateField(field: keyof FormData, value: string) {
     setFormData((current) => ({
@@ -98,34 +81,8 @@ export default function AnalisarGlosaPage() {
       return;
     }
 
-    if (ocrTimeoutRef.current) {
-      clearTimeout(ocrTimeoutRef.current);
-    }
-
     setErro("");
     setArquivoPdf(file);
-    setResultado(null);
-    setRecurso(null);
-    setDocumentoCopiado(false);
-    setOcrStatus("processing");
-
-    ocrTimeoutRef.current = setTimeout(() => {
-      setFormData(dadosExtraidosDemo);
-      setOcrStatus("done");
-    }, 900);
-  }
-
-  function removerArquivo() {
-    if (ocrTimeoutRef.current) {
-      clearTimeout(ocrTimeoutRef.current);
-    }
-
-    setArquivoPdf(null);
-    setOcrStatus("idle");
-
-    if (inputArquivoRef.current) {
-      inputArquivoRef.current.value = "";
-    }
   }
 
   function getPayload() {
@@ -148,8 +105,7 @@ export default function AnalisarGlosaPage() {
     setDocumentoCopiado(false);
 
     try {
-      const apiUrl =
-        process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+      const apiUrl = "https://elos-recovery-ai-backend.onrender.com";
 
       const response = await axios.post<ResultadoAnalise>(
         `${apiUrl}/api/glosa/analisar`,
@@ -172,8 +128,7 @@ export default function AnalisarGlosaPage() {
     setDocumentoCopiado(false);
 
     try {
-      const apiUrl =
-        process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+      const apiUrl = "https://elos-recovery-ai-backend.onrender.com";
 
       const response = await axios.post<RecursoAdministrativo>(
         `${apiUrl}/api/glosa/gerar-recurso`,
@@ -193,16 +148,11 @@ export default function AnalisarGlosaPage() {
     setErro("");
 
     try {
-      const apiUrl =
-        process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+      const apiUrl = "https://elos-recovery-ai-backend.onrender.com";
 
-      const response = await axios.post(
-        `${apiUrl}/api/glosa/gerar-pdf`,
-        getPayload(),
-        {
-          responseType: "blob",
-        }
-      );
+      const response = await axios.post(`${apiUrl}/api/glosa/gerar-pdf`, getPayload(), {
+        responseType: "blob",
+      });
 
       const blob = new Blob([response.data], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
@@ -355,83 +305,25 @@ export default function AnalisarGlosaPage() {
                 </p>
 
                 <input
-                  ref={inputArquivoRef}
                   type="file"
                   accept=".pdf,application/pdf"
                   onChange={selecionarArquivo}
                   className="mt-4 block w-full text-sm text-slate-300 file:mr-4 file:rounded-full file:border-0 file:bg-[#005CA9] file:px-5 file:py-3 file:text-sm file:font-semibold file:text-white hover:file:bg-[#1E73BE]"
                 />
 
-                {ocrStatus === "processing" && (
-                  <div className="mt-4 rounded-xl border border-blue-300/20 bg-blue-300/10 p-4">
-                    <div className="flex items-center gap-2 text-blue-200">
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      <p className="text-sm font-semibold">
-                        Processando documento com OCR simulado...
-                      </p>
-                    </div>
-                    <p className="mt-2 text-sm text-slate-400">
-                      Extraindo dados assistenciais e administrativos do PDF.
-                    </p>
-                  </div>
-                )}
-
                 {arquivoPdf && (
                   <div className="mt-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <div className="flex items-center gap-2 text-emerald-300">
-                          <CheckCircle2 className="h-5 w-5" />
-                          <p className="text-sm font-semibold">
-                            Documento carregado
-                          </p>
-                        </div>
-
-                        <p className="mt-2 text-sm text-white">
-                          {arquivoPdf.name}
-                        </p>
-                        <p className="mt-1 text-xs text-slate-400">
-                          {(arquivoPdf.size / 1024 / 1024).toFixed(2)} MB
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={removerArquivo}
-                        className="inline-flex items-center gap-2 rounded-full border border-red-400/30 px-3 py-2 text-xs font-semibold text-red-300 transition hover:bg-red-400/10"
-                      >
-                        <XCircle className="h-4 w-4" />
-                        Remover
-                      </button>
+                    <div className="flex items-center gap-2 text-emerald-300">
+                      <CheckCircle2 className="h-5 w-5" />
+                      <p className="text-sm font-semibold">
+                        Documento carregado
+                      </p>
                     </div>
 
-                    {ocrStatus === "done" && (
-                      <div className="mt-4 rounded-2xl border border-white/10 bg-slate-950 p-4">
-                        <div className="mb-3 flex items-center gap-2 text-blue-200">
-                          <ScanLine className="h-5 w-5" />
-                          <p className="text-sm font-semibold">
-                            OCR simulado concluído
-                          </p>
-                        </div>
-
-                        <div className="grid gap-3 text-sm md:grid-cols-2">
-                          <MiniData label="Hospital" value={formData.hospital} />
-                          <MiniData label="Convênio" value={formData.convenio} />
-                          <MiniData label="CID" value={formData.cid} />
-                          <MiniData
-                            label="Procedimento"
-                            value={formData.procedimento}
-                          />
-                          <MiniData
-                            label="Valor glosado"
-                            value={`R$ ${Number(
-                              formData.valor_glosado || 0
-                            ).toLocaleString("pt-BR")}`}
-                          />
-                          <MiniData label="Motivo" value={formData.motivo} />
-                        </div>
-                      </div>
-                    )}
+                    <p className="mt-2 text-sm text-white">{arquivoPdf.name}</p>
+                    <p className="mt-1 text-xs text-slate-400">
+                      {(arquivoPdf.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
                   </div>
                 )}
               </div>
@@ -446,7 +338,7 @@ export default function AnalisarGlosaPage() {
 
           <button
             type="submit"
-            disabled={loading || ocrStatus === "processing"}
+            disabled={loading}
             className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#005CA9] px-7 py-4 font-semibold text-white transition hover:bg-[#1E73BE] disabled:cursor-not-allowed disabled:opacity-70 md:w-auto"
           >
             {loading ? (
@@ -686,15 +578,6 @@ function InfoCard({
       <div className="mb-3 flex items-center gap-2 text-blue-200">{icon}</div>
       <p className="text-sm text-slate-400">{label}</p>
       <p className="mt-2 text-base font-semibold text-white">{value}</p>
-    </div>
-  );
-}
-
-function MiniData({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-1 text-sm font-semibold text-white">{value}</p>
     </div>
   );
 }
