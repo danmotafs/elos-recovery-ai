@@ -115,7 +115,7 @@ export default function AnalisarGlosaPage() {
       setResultado(response.data);
     } catch {
       setErro(
-        "Não foi possível analisar o caso. Verifique se o backend FastAPI está rodando na porta 8000."
+        "Não foi possível analisar o caso. Não foi possível conectar ao backend em produção."
       );
     } finally {
       setLoading(false);
